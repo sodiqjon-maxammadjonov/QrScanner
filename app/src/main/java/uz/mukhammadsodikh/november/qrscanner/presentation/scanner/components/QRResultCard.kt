@@ -2,6 +2,7 @@ package uz.mukhammadsodikh.november.qrscanner.presentation.scanner.components
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -28,6 +29,7 @@ import uz.mukhammadsodikh.november.qrscanner.core.design.components.*
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.*
 import uz.mukhammadsodikh.november.qrscanner.domain.model.QRCode
 import uz.mukhammadsodikh.november.qrscanner.domain.model.QRCodeType
+import uz.mukhammadsodikh.november.qrscanner.utils.WiFiConnectionManager
 
 @Composable
 fun QRResultCard(
@@ -214,15 +216,79 @@ fun QRActionButtons(qrCode: QRCode) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(spacing.spaceSmall)
             ) {
-                SubtitleText(text = "SSID: ${type.ssid}")
-                SubtitleText(text = "Password: ${type.password}")
-                SubtitleText(text = "Security: ${type.security}")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SubtitleText(text = "Network:", style = MaterialTheme.typography.bodyMedium)
+                    MyText(
+                        text = type.ssid,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SubtitleText(text = "Password:", style = MaterialTheme.typography.bodyMedium)
+                    MyText(
+                        text = type.password.ifEmpty { "Open Network" },
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SubtitleText(text = "Security:", style = MaterialTheme.typography.bodyMedium)
+                    MyText(
+                        text = type.security,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
 
-                ActionButton(
-                    text = "Copy Password",
-                    icon = Icons.Default.ContentCopy,
-                    onClick = { /* Copy password */ }
-                )
+                Spacer(modifier = Modifier.height(spacing.spaceSmall))
+
+                // Connect button
+                var isConnecting by remember { mutableStateOf(false) }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.spaceSmall)
+                ) {
+                    ActionButton(
+                        text = if (isConnecting) "Connecting..." else "Connect to WiFi",
+                        icon = Icons.Default.Wifi,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            isConnecting = true
+                            WiFiConnectionManager.smartConnect(
+                                context = context,
+                                ssid = type.ssid,
+                                password = type.password,
+                                security = type.security
+                            ) { success, message ->
+                                isConnecting = false
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+
+                    ActionButton(
+                        text = "Copy Password",
+                        icon = Icons.Default.ContentCopy,
+                        modifier = Modifier.weight(1f),
+                        isSecondary = true,
+                        onClick = {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("WiFi Password", type.password)
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(context, "Password copied!", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
             }
         }
 

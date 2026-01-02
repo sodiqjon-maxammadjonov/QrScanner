@@ -89,6 +89,9 @@ android {
 }
 
 dependencies {
+    ///splash
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
     implementation("com.google.guava:guava:31.1-android")
     implementation("com.google.android.gms:play-services-ads:23.5.0")
     implementation("androidx.datastore:datastore-preferences:1.2.0")
@@ -96,6 +99,7 @@ dependencies {
     // Room
     implementation("androidx.room:room-runtime:2.8.4")
     implementation("androidx.room:room-ktx:2.8.4")
+    implementation(libs.androidx.compose.ui.geometry)
     ksp("androidx.room:room-compiler:2.8.4")
 
     // QR/Barcode

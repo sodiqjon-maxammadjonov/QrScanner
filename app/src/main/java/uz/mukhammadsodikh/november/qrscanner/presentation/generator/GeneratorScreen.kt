@@ -1,19 +1,22 @@
 package uz.mukhammadsodikh.november.qrscanner.presentation.generator
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import uz.mukhammadsodikh.november.qrscanner.core.design.components.*
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.LocalSpacing
+import uz.mukhammadsodikh.november.qrscanner.presentation.components.MyInputField
 import uz.mukhammadsodikh.november.qrscanner.presentation.generator.components.QRPreviewCard
 import uz.mukhammadsodikh.november.qrscanner.presentation.generator.components.TypeSelector
 
@@ -24,11 +27,18 @@ fun GeneratorScreen(
     val spacing = LocalSpacing.current
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+    val focusManager = LocalFocusManager.current
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            // ✅ Outside tap → unfocus
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    focusManager.clearFocus()
+                }
+            }
     ) {
         Column(
             modifier = Modifier
@@ -37,7 +47,8 @@ fun GeneratorScreen(
                 .padding(vertical = spacing.spaceLarge),
             verticalArrangement = Arrangement.spacedBy(spacing.spaceLarge)
         ) {
-            // Header
+
+            // ───────────────── Header ─────────────────
             Column(
                 modifier = Modifier.padding(horizontal = spacing.spaceMedium),
                 verticalArrangement = Arrangement.spacedBy(spacing.spaceSmall)
@@ -46,20 +57,22 @@ fun GeneratorScreen(
                 SubtitleText(text = "Create custom QR codes for different purposes")
             }
 
-            // Type selector
+            // ───────────────── Type selector ─────────────────
             TypeSelector(
                 selectedType = uiState.selectedType,
                 onTypeSelected = { viewModel.selectType(it) }
             )
 
-            // Input fields based on selected type
+            // ───────────────── Inputs ─────────────────
             Column(
                 modifier = Modifier.padding(horizontal = spacing.spaceMedium),
                 verticalArrangement = Arrangement.spacedBy(spacing.spaceMedium)
             ) {
+
                 when (uiState.selectedType) {
+
                     is QRInputType.Text -> {
-                        InputField(
+                        MyInputField(
                             value = uiState.textInput,
                             onValueChange = { viewModel.updateTextInput(it) },
                             placeholder = "Enter text...",
@@ -69,7 +82,7 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.Url -> {
-                        InputField(
+                        MyInputField(
                             value = uiState.urlInput,
                             onValueChange = { viewModel.updateUrlInput(it) },
                             placeholder = "https://example.com",
@@ -78,20 +91,20 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.Email -> {
-                        InputField(
+                        MyInputField(
                             value = uiState.emailAddress,
                             onValueChange = { viewModel.updateEmailAddress(it) },
                             placeholder = "email@example.com",
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next
                         )
-                        InputField(
+                        MyInputField(
                             value = uiState.emailSubject,
                             onValueChange = { viewModel.updateEmailSubject(it) },
                             placeholder = "Subject (optional)",
                             imeAction = ImeAction.Next
                         )
-                        InputField(
+                        MyInputField(
                             value = uiState.emailBody,
                             onValueChange = { viewModel.updateEmailBody(it) },
                             placeholder = "Message (optional)",
@@ -101,7 +114,7 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.Phone -> {
-                        InputField(
+                        MyInputField(
                             value = uiState.phoneNumber,
                             onValueChange = { viewModel.updatePhoneNumber(it) },
                             placeholder = "+998901234567",
@@ -110,13 +123,13 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.WiFi -> {
-                        InputField(
+                        MyInputField(
                             value = uiState.wifiSSID,
                             onValueChange = { viewModel.updateWiFiSSID(it) },
                             placeholder = "WiFi Name (SSID)",
                             imeAction = ImeAction.Next
                         )
-                        InputField(
+                        MyInputField(
                             value = uiState.wifiPassword,
                             onValueChange = { viewModel.updateWiFiPassword(it) },
                             placeholder = "Password",
@@ -125,14 +138,14 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.SMS -> {
-                        InputField(
+                        MyInputField(
                             value = uiState.smsNumber,
                             onValueChange = { viewModel.updateSMSNumber(it) },
                             placeholder = "+998901234567",
                             keyboardType = KeyboardType.Phone,
                             imeAction = ImeAction.Next
                         )
-                        InputField(
+                        MyInputField(
                             value = uiState.smsMessage,
                             onValueChange = { viewModel.updateSMSMessage(it) },
                             placeholder = "Message (optional)",
@@ -142,8 +155,8 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.BarcodeEAN13 -> {
-                        SubtitleText(text = "EAN-13: 12-13 digits")
-                        InputField(
+                        SubtitleText(text = "EAN-13: 12–13 digits")
+                        MyInputField(
                             value = uiState.barcodeInput,
                             onValueChange = { viewModel.updateBarcodeInput(it) },
                             placeholder = "1234567890123",
@@ -152,8 +165,8 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.BarcodeEAN8 -> {
-                        SubtitleText(text = "EAN-8: 7-8 digits")
-                        InputField(
+                        SubtitleText(text = "EAN-8: 7–8 digits")
+                        MyInputField(
                             value = uiState.barcodeInput,
                             onValueChange = { viewModel.updateBarcodeInput(it) },
                             placeholder = "12345678",
@@ -162,8 +175,8 @@ fun GeneratorScreen(
                     }
 
                     is QRInputType.BarcodeUPCA -> {
-                        SubtitleText(text = "UPC-A: 11-12 digits")
-                        InputField(
+                        SubtitleText(text = "UPC-A: 11–12 digits")
+                        MyInputField(
                             value = uiState.barcodeInput,
                             onValueChange = { viewModel.updateBarcodeInput(it) },
                             placeholder = "012345678905",
@@ -173,7 +186,7 @@ fun GeneratorScreen(
 
                     is QRInputType.BarcodeCode128 -> {
                         SubtitleText(text = "Code 128: Alphanumeric")
-                        InputField(
+                        MyInputField(
                             value = uiState.barcodeInput,
                             onValueChange = { viewModel.updateBarcodeInput(it) },
                             placeholder = "ABC123XYZ"
@@ -181,7 +194,7 @@ fun GeneratorScreen(
                     }
                 }
 
-                // Generate button
+                // ───────────────── Generate button ─────────────────
                 MyButton(
                     text = "Generate QR Code",
                     onClick = { viewModel.generateQR() },
@@ -189,15 +202,15 @@ fun GeneratorScreen(
                 )
             }
 
-            // QR Preview
-            if (uiState.generatedQRBitmap != null) {
+            // ───────────────── QR Preview ─────────────────
+            uiState.generatedQRBitmap?.let {
                 QRPreviewCard(
-                    bitmap = uiState.generatedQRBitmap!!,
+                    bitmap = it,
                     modifier = Modifier.padding(horizontal = spacing.spaceMedium)
                 )
             }
 
-            // Error message
+            // ───────────────── Error ─────────────────
             if (uiState.generatorState is GeneratorState.Error) {
                 val error = (uiState.generatorState as GeneratorState.Error).message
                 MyCard(

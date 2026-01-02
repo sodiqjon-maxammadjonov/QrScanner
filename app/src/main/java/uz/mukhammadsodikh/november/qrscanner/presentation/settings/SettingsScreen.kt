@@ -79,13 +79,13 @@ fun SettingsScreen(
 
         // Preferences Section
         SettingsSection(title = "Preferences") {
-            SettingsSwitchItem(
-                icon = Icons.Default.Vibration,
-                title = "Vibration",
-                subtitle = "Vibrate on scan",
-                checked = uiState.vibration,
-                onCheckedChange = { viewModel.toggleVibration() }
-            )
+//            SettingsSwitchItem(
+//                icon = Icons.Default.Vibration,
+//                title = "Vibration",
+//                subtitle = "Vibrate on scan",
+//                checked = uiState.vibration,
+//                onCheckedChange = { viewModel.toggleVibration() }
+//            )
 
             SettingsSwitchItem(
                 icon = Icons.Default.VolumeUp,

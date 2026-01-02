@@ -2,26 +2,20 @@ package uz.mukhammadsodikh.november.qrscanner.presentation.scanner.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.*
+import kotlin.math.PI
+import kotlin.math.sin
 
 @Composable
 fun CameraPreviewBox(
@@ -37,202 +31,293 @@ fun CameraPreviewBox(
             .padding(spacing.spaceLarge),
         contentAlignment = Alignment.Center
     ) {
-        // Background blur effect (iOS style)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(spacing.cornerRadiusLarge))
-                .background(Color.Black.copy(alpha = 0.3f))
-                .blur(20.dp)
+        // Ultra Premium Scanner Frame
+        UltraPremiumScannerFrame(
+            isScanning = isScanning,
+            frameSize = spacing.scannerFrameSize
         )
 
-        // Main camera frame
-        CameraFrame(isScanning = isScanning)
-
-        // Scanning line animation
+        // Smooth Scanning Effect
         if (isScanning) {
-            ScanningLine()
+            SmoothScanningEffect(frameSize = spacing.scannerFrameSize)
         }
-
-        // Corner decorations
-        ScannerCorners()
     }
 }
 
 @Composable
-fun CameraFrame(isScanning: Boolean) {
+fun UltraPremiumScannerFrame(
+    isScanning: Boolean,
+    frameSize: androidx.compose.ui.unit.Dp
+) {
     val spacing = LocalSpacing.current
-    val frameSize = spacing.scannerFrameSize
 
-    // Pulsing animation when scanning
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.7f,
+    // Breathing animation
+    val infiniteTransition = rememberInfiniteTransition(label = "breathe")
+    val breatheScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.02f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
+            animation = tween(2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "pulse"
+        label = "breathe"
+    )
+
+    val glowIntensity by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.9f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow"
     )
 
     Canvas(
         modifier = Modifier
             .size(frameSize)
+            .graphicsLayer {
+                scaleX = if (isScanning) breatheScale else 1f
+                scaleY = if (isScanning) breatheScale else 1f
+            }
     ) {
-        val canvasWidth = size.width
-        val canvasHeight = size.height
-        val strokeWidth = 3.dp.toPx()
+        val w = size.width
+        val h = size.height
+        val cornerLen = spacing.scannerCornerLength.toPx()
+        val strokeW = spacing.scannerCornerWidth.toPx()
+        val radius = 40.dp.toPx()
 
-        // Main frame border (dashed)
-        drawRoundRect(
-            color = if (isScanning) ScannerFrame.copy(alpha = pulseAlpha) else Color.White.copy(0.5f),
-            topLeft = Offset.Zero,
-            size = Size(canvasWidth, canvasHeight),
-            cornerRadius = CornerRadius(24.dp.toPx()),
-            style = Stroke(
-                width = strokeWidth,
-                pathEffect = PathEffect.dashPathEffect(
-                    intervals = floatArrayOf(20f, 10f),
-                    phase = 0f
-                )
+        val frameColor = if (isScanning) {
+            Color(0xFF0A84FF)
+        } else {
+            Color.White.copy(alpha = 0.7f)
+        }
+
+        // ═══════════════════════════════════════════
+        // 🌟 OUTER GLOW (Premium halo effect)
+        // ═══════════════════════════════════════════
+        if (isScanning) {
+            drawRoundRect(
+                brush = Brush.radialGradient(
+                    listOf(
+                        Color(0xFF0A84FF).copy(alpha = glowIntensity * 0.3f),
+                        Color(0xFF64D2FF).copy(alpha = glowIntensity * 0.15f),
+                        Color.Transparent
+                    ),
+                    center = Offset(w / 2, h / 2),
+                    radius = w / 1.8f
+                ),
+                topLeft = Offset(-20.dp.toPx(), -20.dp.toPx()),
+                size = Size(w + 40.dp.toPx(), h + 40.dp.toPx()),
+                cornerRadius = CornerRadius(radius + 20.dp.toPx())
+            )
+        }
+
+        // ═══════════════════════════════════════════
+        // ✨ PREMIUM CORNERS with GRADIENT
+        // ═══════════════════════════════════════════
+        val cornerGradient = Brush.linearGradient(
+            listOf(
+                frameColor,
+                frameColor.copy(alpha = 0.6f)
             )
         )
 
-        // Inner glow effect
+        drawCornerPath(
+            color = frameColor,
+            w = w,
+            h = h,
+            cornerLen = cornerLen,
+            strokeW = strokeW,
+            radius = radius,
+            glowIntensity = if (isScanning) glowIntensity else 0.5f
+        )
+
+        // ═══════════════════════════════════════════
+        // 💎 INNER SUBTLE BORDER (depth effect)
+        // ═══════════════════════════════════════════
         drawRoundRect(
-            brush = Brush.radialGradient(
-                listOf(
-                    ScannerFrame.copy(alpha = 0.2f),
-                    Color.Transparent
-                ),
-                center = Offset(canvasWidth / 2, canvasHeight / 2),
-                radius = canvasWidth / 2
-            ),
-            topLeft = Offset.Zero,
-            size = Size(canvasWidth, canvasHeight),
-            cornerRadius = CornerRadius(24.dp.toPx())
+            color = Color.White.copy(alpha = 0.1f),
+            topLeft = Offset(10.dp.toPx(), 10.dp.toPx()),
+            size = Size(w - 20.dp.toPx(), h - 20.dp.toPx()),
+            cornerRadius = CornerRadius(radius - 10.dp.toPx()),
+            style = Stroke(width = 1.dp.toPx())
         )
     }
 }
 
-@Composable
-fun ScanningLine() {
-    val spacing = LocalSpacing.current
-    val frameSize = spacing.scannerFrameSize
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCornerPath(
+    color: Color,
+    w: Float,
+    h: Float,
+    cornerLen: Float,
+    strokeW: Float,
+    radius: Float,
+    glowIntensity: Float
+) {
+    val path = Path()
 
+    // Enhanced glow for each corner
+    listOf(
+        Offset(cornerLen / 2, cornerLen / 2),
+        Offset(w - cornerLen / 2, cornerLen / 2),
+        Offset(cornerLen / 2, h - cornerLen / 2),
+        Offset(w - cornerLen / 2, h - cornerLen / 2)
+    ).forEach { corner ->
+        drawCircle(
+            brush = Brush.radialGradient(
+                listOf(
+                    color.copy(alpha = glowIntensity * 0.4f),
+                    Color.Transparent
+                ),
+                center = corner,
+                radius = 30.dp.toPx()
+            ),
+            radius = 30.dp.toPx(),
+            center = corner
+        )
+    }
+
+    // ╔ Top-Left
+    path.reset()
+    path.moveTo(0f, cornerLen)
+    path.lineTo(0f, radius)
+    path.arcTo(Rect(0f, 0f, radius * 2, radius * 2), 180f, 90f, false)
+    path.lineTo(cornerLen, 0f)
+    drawPath(path, color, style = Stroke(width = strokeW, cap = StrokeCap.Round))
+
+    // ╗ Top-Right
+    path.reset()
+    path.moveTo(w - cornerLen, 0f)
+    path.lineTo(w - radius, 0f)
+    path.arcTo(Rect(w - radius * 2, 0f, w, radius * 2), 270f, 90f, false)
+    path.lineTo(w, cornerLen)
+    drawPath(path, color, style = Stroke(width = strokeW, cap = StrokeCap.Round))
+
+    // ╚ Bottom-Left
+    path.reset()
+    path.moveTo(0f, h - cornerLen)
+    path.lineTo(0f, h - radius)
+    path.arcTo(Rect(0f, h - radius * 2, radius * 2, h), 180f, -90f, false)
+    path.lineTo(cornerLen, h)
+    drawPath(path, color, style = Stroke(width = strokeW, cap = StrokeCap.Round))
+
+    // ╝ Bottom-Right
+    path.reset()
+    path.moveTo(w, h - cornerLen)
+    path.lineTo(w, h - radius)
+    path.arcTo(Rect(w - radius * 2, h - radius * 2, w, h), 0f, 90f, false)
+    path.lineTo(w - cornerLen, h)
+    drawPath(path, color, style = Stroke(width = strokeW, cap = StrokeCap.Round))
+}
+
+@Composable
+fun SmoothScanningEffect(frameSize: androidx.compose.ui.unit.Dp) {
     val infiniteTransition = rememberInfiniteTransition(label = "scan")
-    val offsetY by infiniteTransition.animateFloat(
+
+    // Smooth sine wave movement
+    val progress by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = frameSize.value,
+        targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
+            animation = tween(3000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "scan"
+        label = "progress"
     )
 
-    Canvas(
-        modifier = Modifier.size(frameSize)
-    ) {
-        val lineY = offsetY * density
-        val canvasWidth = size.width
+    // Breathing pulse
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
 
-        // Scanning line with gradient
+    Canvas(modifier = Modifier.size(frameSize)) {
+        val w = size.width
+        val h = size.height
+        val padding = 50.dp.toPx()
+
+        // Sine wave position for smooth motion
+        val sineY = (sin(progress * 2 * PI) + 1) / 2
+        val lineY = padding + (h - padding * 2) * sineY.toFloat()
+
+        // ═══════════════════════════════════════════
+        // 🌊 GRADIENT WAVE (top to bottom fade)
+        // ═══════════════════════════════════════════
+        val waveHeight = 80.dp.toPx()
+        val waveTop = (lineY - waveHeight).coerceAtLeast(padding)
+
+        drawRect(
+            brush = Brush.verticalGradient(
+                listOf(
+                    Color.Transparent,
+                    Color(0xFF64D2FF).copy(alpha = pulseAlpha * 0.15f),
+                    Color(0xFF0A84FF).copy(alpha = pulseAlpha * 0.25f)
+                ),
+                startY = waveTop,
+                endY = lineY
+            ),
+            topLeft = Offset(padding, waveTop),
+            size = Size(w - padding * 2, lineY - waveTop)
+        )
+
+        // ═══════════════════════════════════════════
+        // ✨ MAIN SCANNING LINE (ultra bright)
+        // ═══════════════════════════════════════════
         drawLine(
             brush = Brush.horizontalGradient(
                 listOf(
                     Color.Transparent,
-                    AccentCyan.copy(alpha = 0.8f),
-                    AccentCyan,
-                    AccentCyan.copy(alpha = 0.8f),
+                    Color(0xFF64D2FF).copy(alpha = pulseAlpha * 0.4f),
+                    Color(0xFF0A84FF).copy(alpha = pulseAlpha),
+                    Color(0xFF5E5CE6).copy(alpha = pulseAlpha),
+                    Color(0xFF64D2FF).copy(alpha = pulseAlpha * 0.4f),
                     Color.Transparent
                 )
             ),
-            start = Offset(0f, lineY),
-            end = Offset(canvasWidth, lineY),
-            strokeWidth = 3.dp.toPx(),
+            start = Offset(padding, lineY),
+            end = Offset(w - padding, lineY),
+            strokeWidth = 4.dp.toPx(),
             cap = StrokeCap.Round
         )
 
-        // Glow effect above the line
-        drawLine(
-            brush = Brush.verticalGradient(
+        // ═══════════════════════════════════════════
+        // 💫 CENTER GLOW SPOT (focal point)
+        // ═══════════════════════════════════════════
+        drawCircle(
+            brush = Brush.radialGradient(
                 listOf(
-                    Color.Transparent,
-                    AccentCyan.copy(alpha = 0.3f)
+                    Color(0xFF0A84FF).copy(alpha = pulseAlpha * 0.8f),
+                    Color(0xFF64D2FF).copy(alpha = pulseAlpha * 0.4f),
+                    Color(0xFF5E5CE6).copy(alpha = pulseAlpha * 0.2f),
+                    Color.Transparent
                 ),
-                startY = lineY - 50.dp.toPx(),
-                endY = lineY
+                center = Offset(w / 2, lineY),
+                radius = 60.dp.toPx()
             ),
-            start = Offset(20.dp.toPx(), lineY - 25.dp.toPx()),
-            end = Offset(canvasWidth - 20.dp.toPx(), lineY - 25.dp.toPx()),
-            strokeWidth = 50.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-    }
-}
-
-@Composable
-fun ScannerCorners() {
-    val spacing = LocalSpacing.current
-    val frameSize = spacing.scannerFrameSize
-    val cornerLength = spacing.scannerCornerLength
-    val cornerWidth = spacing.scannerCornerWidth
-
-    Canvas(modifier = Modifier.size(frameSize)) {
-        val canvasWidth = size.width
-        val canvasHeight = size.height
-        val strokeWidth = cornerWidth.toPx()
-        val length = cornerLength.toPx()
-        val cornerRadius = 24.dp.toPx()
-
-        // Top-Left Corner
-        drawPath(
-            path = Path().apply {
-                moveTo(cornerRadius, 0f)
-                lineTo(length, 0f)
-                moveTo(0f, cornerRadius)
-                lineTo(0f, length)
-            },
-            color = ScannerCorner,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            radius = 60.dp.toPx(),
+            center = Offset(w / 2, lineY)
         )
 
-        // Top-Right Corner
-        drawPath(
-            path = Path().apply {
-                moveTo(canvasWidth - length, 0f)
-                lineTo(canvasWidth - cornerRadius, 0f)
-                moveTo(canvasWidth, cornerRadius)
-                lineTo(canvasWidth, length)
-            },
-            color = ScannerCorner,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-        )
-
-        // Bottom-Left Corner
-        drawPath(
-            path = Path().apply {
-                moveTo(0f, canvasHeight - length)
-                lineTo(0f, canvasHeight - cornerRadius)
-                moveTo(cornerRadius, canvasHeight)
-                lineTo(length, canvasHeight)
-            },
-            color = ScannerCorner,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-        )
-
-        // Bottom-Right Corner
-        drawPath(
-            path = Path().apply {
-                moveTo(canvasWidth, canvasHeight - length)
-                lineTo(canvasWidth, canvasHeight - cornerRadius)
-                moveTo(canvasWidth - cornerRadius, canvasHeight)
-                lineTo(canvasWidth - length, canvasHeight)
-            },
-            color = ScannerCorner,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-        )
+        // ═══════════════════════════════════════════
+        // ⚡ PARTICLE TRAIL (behind line)
+        // ═══════════════════════════════════════════
+        for (i in 1..5) {
+            val trailY = lineY - (i * 15.dp.toPx())
+            if (trailY > padding) {
+                drawLine(
+                    color = Color(0xFF64D2FF).copy(alpha = pulseAlpha * 0.1f / i),
+                    start = Offset(padding + 30.dp.toPx(), trailY),
+                    end = Offset(w - padding - 30.dp.toPx(), trailY),
+                    strokeWidth = (4 - i).dp.toPx().coerceAtLeast(1f),
+                    cap = StrokeCap.Round
+                )
+            }
+        }
     }
 }

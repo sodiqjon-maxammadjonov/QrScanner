@@ -12,23 +12,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.QRScannerTheme
 import uz.mukhammadsodikh.november.qrscanner.data.preferences.PreferencesManager
 import uz.mukhammadsodikh.november.qrscanner.presentation.main.MainScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // PreferencesManager instance
         val preferencesManager = PreferencesManager(this)
-
         setContent {
-            // DataStore'dan dark mode'ni o'qiymiz
             val darkMode by preferencesManager.darkMode.collectAsState(initial = false)
             QRScannerTheme(
-                darkTheme = darkMode // Settings'dan keladi!
+                darkTheme = darkMode
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize()
