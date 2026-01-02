@@ -8,78 +8,44 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// ═══════════════════════════════════════════════════════════════
-// 🌙 DARK COLOR SCHEME
-// ═══════════════════════════════════════════════════════════════
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryBlue,
-    onPrimary = Color.White,
-    primaryContainer = PrimaryPurple,
-    onPrimaryContainer = Color.White,
-
-    secondary = AccentCyan,
-    onSecondary = Color.White,
-    secondaryContainer = AccentPink,
-    onSecondaryContainer = Color.White,
-
-    tertiary = PrimaryPurple,
-    onTertiary = Color.White,
-
+    secondary = PrimaryPurple,
+    tertiary = AccentCyan,
     background = DarkBackground,
-    onBackground = DarkText,
-    surface = DarkSurface,
-    onSurface = DarkText,
+    surface = DarkBottomNav,
     surfaceVariant = DarkSurfaceVariant,
+    onPrimary = DarkText,
+    onSecondary = DarkText,
+    onTertiary = DarkText,
+    onBackground = DarkText,
+    onSurface = DarkText,
     onSurfaceVariant = DarkTextSecondary,
-
     error = ErrorRed,
-    onError = Color.White,
-
-    outline = DarkBorder,
-    outlineVariant = DarkBorder.copy(alpha = 0.5f),
-    surfaceTint = PrimaryBlue.copy(alpha = 0.1f)
+    outline = DarkBorder
 )
 
-// ═══════════════════════════════════════════════════════════════
-// 🌞 LIGHT COLOR SCHEME
-// ═══════════════════════════════════════════════════════════════
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryBlue,
-    onPrimary = Color.White,
-    primaryContainer = PrimaryPurple,
-    onPrimaryContainer = Color.White,
-
-    secondary = AccentCyan,
-    onSecondary = Color.White,
-    secondaryContainer = AccentPink,
-    onSecondaryContainer = Color.White,
-
-    tertiary = PrimaryPurple,
-    onTertiary = Color.White,
-
+    secondary = PrimaryPurple,
+    tertiary = AccentCyan,
     background = LightBackground,
-    onBackground = LightText,
-    surface = LightSurface,
-    onSurface = LightText,
+    surface = LightBottomNav,
     surfaceVariant = LightSurfaceVariant,
+    onPrimary = LightText,
+    onSecondary = LightText,
+    onTertiary = LightText,
+    onBackground = LightText,
+    onSurface = LightText,
     onSurfaceVariant = LightTextSecondary,
-
     error = ErrorRed,
-    onError = Color.White,
-
-    outline = LightBorder,
-    outlineVariant = LightBorder.copy(alpha = 0.5f),
-    surfaceTint = PrimaryBlue.copy(alpha = 0.05f)
+    outline = LightBorder
 )
 
-// ═══════════════════════════════════════════════════════════════
-// 🎨 MAIN THEME COMPOSABLE
-// ═══════════════════════════════════════════════════════════════
 @Composable
 fun QRScannerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -93,12 +59,7 @@ fun QRScannerTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            window.navigationBarColor = colorScheme.background.toArgb()
-
-            WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = !darkTheme
-                isAppearanceLightNavigationBars = !darkTheme
-            }
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 

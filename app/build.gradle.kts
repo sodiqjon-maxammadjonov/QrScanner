@@ -38,7 +38,6 @@ android {
         }
     }
 
-    // Bundle (AAB) uchun optimizatsiya
     bundle {
         language {
             enableSplit = true

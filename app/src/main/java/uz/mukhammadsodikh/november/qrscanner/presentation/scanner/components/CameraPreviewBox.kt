@@ -94,7 +94,8 @@ fun PremiumScannerFrame(
         if (isScanning) {
             drawRoundRect(
                 brush = Brush.radialGradient(
-                    colors = listOf(
+                    colors =
+                        listOf(
                         ScannerBlue.copy(alpha = glowIntensity * 0.4f),
                         ScannerCyan.copy(alpha = glowIntensity * 0.2f),
                         Color.Transparent

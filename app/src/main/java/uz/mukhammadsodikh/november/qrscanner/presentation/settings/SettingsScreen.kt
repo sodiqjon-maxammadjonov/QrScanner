@@ -313,6 +313,7 @@ fun SettingsClickableItem(
     }
 }
 
+
 @Composable
 fun SettingsInfoItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
