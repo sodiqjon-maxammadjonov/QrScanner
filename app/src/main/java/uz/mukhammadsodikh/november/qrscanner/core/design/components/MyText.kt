@@ -1,6 +1,5 @@
 package uz.mukhammadsodikh.november.qrscanner.core.design.components
 
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,22 +33,28 @@ fun MyText(
     )
 }
 
-// Qulaylik uchun qo'shimcha variantlar
+/* ---------- TITLE ---------- */
+
 @Composable
 fun TitleText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onBackground,
-    style: TextStyle = MaterialTheme.typography.displayMedium
+    style: TextStyle = MaterialTheme.typography.displayMedium,
+    fontWeight: FontWeight = FontWeight.Bold,
+    textAlign: TextAlign? = null
 ) {
     MyText(
         text = text,
         modifier = modifier,
         color = color,
         style = style,
-        fontWeight = FontWeight.Bold
+        fontWeight = fontWeight,
+        textAlign = textAlign
     )
 }
+
+/* ---------- SUBTITLE ---------- */
 
 @Composable
 fun SubtitleText(
@@ -57,32 +62,39 @@ fun SubtitleText(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     style: TextStyle = MaterialTheme.typography.bodyMedium,
+    fontWeight: FontWeight? = null,
     maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Clip
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null
 ) {
     MyText(
         text = text,
         modifier = modifier,
         color = color,
         style = style,
+        fontWeight = fontWeight,
         maxLines = maxLines,
-        overflow = overflow
+        overflow = overflow,
+        textAlign = textAlign
     )
 }
 
+/* ---------- CAPTION ---------- */
 
 @Composable
 fun CaptionText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    fontWeight: FontWeight? = null
+    fontWeight: FontWeight? = null,
+    textAlign: TextAlign? = null
 ) {
     MyText(
         text = text,
         modifier = modifier,
         color = color,
         style = MaterialTheme.typography.bodySmall,
-        fontWeight = fontWeight
+        fontWeight = fontWeight,
+        textAlign = textAlign
     )
 }

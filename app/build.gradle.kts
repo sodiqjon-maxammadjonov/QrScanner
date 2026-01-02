@@ -14,20 +14,16 @@ android {
         applicationId = "uz.mukhammadsodikh.november.qrscanner"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // ✅ ASOSIY O'ZGARISHLAR SHU YERDA
     buildTypes {
         release {
-            // Kodni kichraytirish
             isMinifyEnabled = true
-            // Resurslarni kichraytirish
             isShrinkResources = true
-            // ProGuard sozlamalari
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -70,7 +66,6 @@ android {
         compose = true
     }
 
-    // Compose optimizatsiya
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
     }
@@ -100,6 +95,7 @@ dependencies {
     implementation("androidx.room:room-runtime:2.8.4")
     implementation("androidx.room:room-ktx:2.8.4")
     implementation(libs.androidx.compose.ui.geometry)
+    implementation(libs.androidx.compose.foundation)
     ksp("androidx.room:room-compiler:2.8.4")
 
     // QR/Barcode

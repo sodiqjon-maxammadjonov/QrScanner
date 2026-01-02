@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,7 +15,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -22,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import uz.mukhammadsodikh.november.qrscanner.core.design.components.*
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.LocalSpacing
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.PrimaryBlue
+import uz.mukhammadsodikh.november.qrscanner.core.design.theme.PrimaryPurple
 import uz.mukhammadsodikh.november.qrscanner.presentation.components.BannerAd
 import uz.mukhammadsodikh.november.qrscanner.utils.AdMobManager
 
@@ -111,10 +116,21 @@ fun SettingsScreen(
                 title = "Rate App",
                 subtitle = "Rate us on Play Store",
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        data = Uri.parse("market://details?id=${context.packageName}")
+                    try {
+                        // Avval Play Store ilovasini ochishga harakat qilamiz
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            data = Uri.parse("market://details?id=${context.packageName}")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        // Agar Play Store ilova o'rnatilmagan bo'lsa, brauzerda ochamiz
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            data = Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
                     }
-                    context.startActivity(intent)
                 }
             )
 
@@ -123,9 +139,12 @@ fun SettingsScreen(
                 title = "Share App",
                 subtitle = "Share with friends",
                 onClick = {
+                    val shareText = viewModel.getShareText(context.packageName)
+
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Check out this QR Scanner app!")
+                        putExtra(Intent.EXTRA_TEXT, shareText)
+                        putExtra(Intent.EXTRA_SUBJECT, "QR Scanner App")
                     }
                     context.startActivity(Intent.createChooser(intent, "Share via"))
                 }
@@ -158,15 +177,35 @@ fun SettingsSection(
             .padding(horizontal = spacing.spaceMedium),
         verticalArrangement = Arrangement.spacedBy(spacing.spaceSmall)
     ) {
-        CaptionText(
-            text = title.uppercase(),
-            color = PrimaryBlue,
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.spaceSmall),
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = spacing.spaceSmall)
-        )
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(16.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(PrimaryBlue, PrimaryPurple)
+                        )
+                    )
+            )
 
-        MyCard {
+            CaptionText(
+                text = title.uppercase(),
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        GlassCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(spacing.spaceMedium)
+                verticalArrangement = Arrangement.spacedBy(spacing.spaceSmall)
             ) {
                 content()
             }

@@ -69,4 +69,8 @@ class SettingsViewModel(context: Context) : ViewModel() {
             preferencesManager.setLanguage(language)
         }
     }
+    fun getShareText(packageName: String): String {
+        val appLink = "https://play.google.com/store/apps/details?id=$packageName"
+        return "Check out this amazing QR Scanner app! Download it here: $appLink"
+    }
 }

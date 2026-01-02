@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import uz.mukhammadsodikh.november.qrscanner.core.design.theme.GlassBlur
+//import uz.mukhammadsodikh.november.qrscanner.core.design.theme.GlassBlur
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.LocalSpacing
 
 @Composable
@@ -48,22 +48,29 @@ fun MyCard(
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
+    backgroundColor: Color? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val spacing = LocalSpacing.current
     val isDark = MaterialTheme.colorScheme.background == Color(0xFF000000)
 
+    val backgroundModifier = if (backgroundColor != null) {
+        Modifier.background(backgroundColor)
+    } else {
+        Modifier.background(
+            brush = Brush.verticalGradient(
+                listOf(
+                    if (isDark) Color(0x33FFFFFF) else Color(0xCCFFFFFF),
+                    if (isDark) Color(0x1AFFFFFF) else Color(0xB3FFFFFF)
+                )
+            )
+        )
+    }
+
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(spacing.cornerRadiusLarge))
-            .background(
-                brush = Brush.verticalGradient(
-                    listOf(
-                        if (isDark) Color(0x33FFFFFF) else Color(0xCCFFFFFF),
-                        if (isDark) Color(0x1AFFFFFF) else Color(0xB3FFFFFF)
-                    )
-                )
-            )
+            .then(backgroundModifier)
             .border(
                 width = spacing.borderWidth,
                 brush = Brush.linearGradient(
