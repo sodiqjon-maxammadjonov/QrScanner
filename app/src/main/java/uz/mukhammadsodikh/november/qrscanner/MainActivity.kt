@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.navigationBars) // Bu qator muhim!
+                    .windowInsetsPadding(WindowInsets.navigationBars)
 
                 ) {
                     MainScreen()

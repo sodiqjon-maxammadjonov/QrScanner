@@ -1,6 +1,5 @@
 package uz.mukhammadsodikh.november.qrscanner.utils
 
-
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiConfiguration
@@ -12,6 +11,9 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 
+/**
+ * WiFi Connection Manager
+ */
 object WiFiConnectionManager {
 
     /**
@@ -26,17 +28,33 @@ object WiFiConnectionManager {
         onResult: (Boolean, String) -> Unit
     ) {
         try {
-            val specifier = WifiNetworkSpecifier.Builder()
+            val builder = WifiNetworkSpecifier.Builder()
                 .setSsid(ssid)
-                .apply {
-                    when (security.uppercase()) {
-                        "WPA", "WPA2", "WPA3" -> setWpa2Passphrase(password)
-                        "WEP" -> setWpa2Passphrase(password) // WEP deprecated
-                        "NOPASS", "" -> {} // Open network
-                        else -> setWpa2Passphrase(password)
+
+            // Security type handling
+            when (security.uppercase()) {
+                "WPA", "WPA2", "WPA3", "WPA/WPA2", "WPA2/WPA3" -> {
+                    if (password.isNotEmpty()) {
+                        builder.setWpa2Passphrase(password)
                     }
                 }
-                .build()
+                "WEP" -> {
+                    if (password.isNotEmpty()) {
+                        builder.setWpa2Passphrase(password) // WEP deprecated, use WPA
+                    }
+                }
+                "OPEN", "NOPASS", "" -> {
+                    // Open network - no password
+                }
+                else -> {
+                    // Default to WPA
+                    if (password.isNotEmpty()) {
+                        builder.setWpa2Passphrase(password)
+                    }
+                }
+            }
+
+            val specifier = builder.build()
 
             val request = NetworkRequest.Builder()
                 .addTransportType(android.net.NetworkCapabilities.TRANSPORT_WIFI)
@@ -54,7 +72,7 @@ object WiFiConnectionManager {
 
                 override fun onUnavailable() {
                     super.onUnavailable()
-                    onResult(false, "Failed to connect to $ssid")
+                    onResult(false, "Cannot connect to $ssid. Check password.")
                 }
             }
 

@@ -108,13 +108,24 @@ object QRCodeParser {
         var security = "WPA"
 
         params.forEach { param ->
-            val (key, value) = param.split(":", limit = 2)
-            when (key.uppercase()) {
-                "S" -> ssid = value
-                "P" -> password = value
-                "T" -> security = value
+            if (param.contains(":")) {
+                val parts = param.split(":", limit = 2)
+                val key = parts[0].trim()
+                val value = parts.getOrNull(1)?.trim() ?: ""
+
+                when (key.uppercase()) {
+                    "S" -> ssid = value.removeSurrounding("\"")
+                    "P" -> password = value.removeSurrounding("\"")
+                    "T" -> security = value.uppercase()
+                }
             }
         }
+
+        // Security type fix
+        if (security.isEmpty() || security == "NOPASS") {
+            security = "OPEN"
+        }
+
         return QRCodeType.WiFi(ssid, password, security)
     }
 

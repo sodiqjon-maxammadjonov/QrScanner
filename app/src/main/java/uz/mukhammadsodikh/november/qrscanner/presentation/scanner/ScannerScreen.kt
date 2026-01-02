@@ -32,10 +32,7 @@ import uz.mukhammadsodikh.november.qrscanner.core.design.theme.LocalSpacing
 import uz.mukhammadsodikh.november.qrscanner.core.design.theme.PrimaryBlue
 import uz.mukhammadsodikh.november.qrscanner.data.preferences.PreferencesManager
 import uz.mukhammadsodikh.november.qrscanner.domain.model.QRCode
-import uz.mukhammadsodikh.november.qrscanner.presentation.scanner.components.CameraPreview
-import uz.mukhammadsodikh.november.qrscanner.presentation.scanner.components.CameraPreviewBox
-import uz.mukhammadsodikh.november.qrscanner.presentation.scanner.components.QRResultCard
-import uz.mukhammadsodikh.november.qrscanner.utils.HapticFeedbackManager
+import uz.mukhammadsodikh.november.qrscanner.presentation.scanner.components.*
 import uz.mukhammadsodikh.november.qrscanner.utils.SoundManager
 import uz.mukhammadsodikh.november.qrscanner.utils.AdMobManager
 
@@ -94,13 +91,7 @@ fun ScannerScreen(
             onQRScanned?.invoke(qrCode, "QR_CODE")
 
             scope.launch {
-                // Haptic feedback
-                val vibrationEnabled = preferencesManager.vibration.first()
-                if (vibrationEnabled) {
-                    HapticFeedbackManager.vibrateSuccess(context)
-                }
 
-                // Sound feedback
                 val soundEnabled = preferencesManager.sound.first()
                 if (soundEnabled) {
                     SoundManager.playSuccessSound(context)

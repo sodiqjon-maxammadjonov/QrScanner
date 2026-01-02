@@ -216,37 +216,44 @@ fun QRActionButtons(qrCode: QRCode) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(spacing.spaceSmall)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                // Debug info
+                MyCard(
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 ) {
-                    SubtitleText(text = "Network:", style = MaterialTheme.typography.bodyMedium)
-                    MyText(
-                        text = type.ssid,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    SubtitleText(text = "Password:", style = MaterialTheme.typography.bodyMedium)
-                    MyText(
-                        text = type.password.ifEmpty { "Open Network" },
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    SubtitleText(text = "Security:", style = MaterialTheme.typography.bodyMedium)
-                    MyText(
-                        text = type.security,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            SubtitleText(text = "Network:", style = MaterialTheme.typography.bodySmall)
+                            MyText(
+                                text = type.ssid,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            SubtitleText(text = "Password:", style = MaterialTheme.typography.bodySmall)
+                            MyText(
+                                text = if (type.password.isEmpty()) "Open Network" else type.password,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            SubtitleText(text = "Security:", style = MaterialTheme.typography.bodySmall)
+                            MyText(
+                                text = type.security.ifEmpty { "OPEN" },
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(spacing.spaceSmall))
@@ -259,7 +266,7 @@ fun QRActionButtons(qrCode: QRCode) {
                     horizontalArrangement = Arrangement.spacedBy(spacing.spaceSmall)
                 ) {
                     ActionButton(
-                        text = if (isConnecting) "Connecting..." else "Connect to WiFi",
+                        text = if (isConnecting) "Connecting..." else "Connect",
                         icon = Icons.Default.Wifi,
                         modifier = Modifier.weight(1f),
                         onClick = {
@@ -271,23 +278,25 @@ fun QRActionButtons(qrCode: QRCode) {
                                 security = type.security
                             ) { success, message ->
                                 isConnecting = false
-                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             }
                         }
                     )
 
-                    ActionButton(
-                        text = "Copy Password",
-                        icon = Icons.Default.ContentCopy,
-                        modifier = Modifier.weight(1f),
-                        isSecondary = true,
-                        onClick = {
-                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("WiFi Password", type.password)
-                            clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "Password copied!", Toast.LENGTH_SHORT).show()
-                        }
-                    )
+                    if (type.password.isNotEmpty()) {
+                        ActionButton(
+                            text = "Copy",
+                            icon = Icons.Default.ContentCopy,
+                            modifier = Modifier.weight(1f),
+                            isSecondary = true,
+                            onClick = {
+                                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("WiFi Password", type.password)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "Password copied!", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
                 }
             }
         }
